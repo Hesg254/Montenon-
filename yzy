@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Онлайн-чат</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 85vh;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Боковая панель с контактами */
+        .sidebar {
+            width: 300px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #34495e;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .sidebar-header h2 {
+            margin-left: 10px;
+            font-size: 1.5rem;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .contact-search {
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: none;
+            background-color: #34495e;
+            color: white;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .contact-search::placeholder {
+            color: #bdc3c7;
+        }
+
+        .contacts-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .contact {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 8px;
+        }
+
+        .contact:hover, .contact.active {
+            background-color: #34495e;
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #1abc9c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .contact-info h4 {
+            font-size: 1rem;
+        }
+
+        .contact-info p {
+            font-size: 0.8rem;
+            color: #bdc3c7;
+            margin-top: 3px;
+        }
+
+        /* Основная область чата */
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header-info h3 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .chat-header-info p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 3px;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.incoming {
+            background-color: #e9ecef;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.outgoing {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex-grow: 1;
+            padding: 15px 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+
+        .message-input:focus {
+            border-color: #007bff;
+        }
+
+        .send-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            transition: background-color 0.3s;
+        }
+
+        .send-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Прокрутка */
+        .contacts-list::-webkit-scrollbar,
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .contacts-list::-webkit-scrollbar-track,
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .contacts-list::-webkit-scrollbar-thumb,
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 3px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+            }
+            .chat-container {
+                height: 90vh;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                display: none;
+            }
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Боковая панель с контактами -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-avatar">Я</div>
+                <h2>Мой чат</h2>
+            </div>
+            <input type="text" class="contact-search" placeholder="Поиск контактов...">
+            <div class="contacts-list" id="contactsList">
+                <!-- Контакты будут добавлены через JavaScript -->
+            </div>
+        </div>
+
+        <!-- Основная область чата -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <h3 id="activeContactName">Общий чат</h3>
+                    <p id="activeContactStatus">В сети</p>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <!-- Сообщения будут добавляться здесь -->
+                <div class="message incoming">
+                    <p>Добро пожаловать в онлайн-чат! Начните общение.</p>
+                    <div class="message-time">10:00</div>
+                </div>
+                <div class="message outgoing">
+                    <p>Привет! Как дела?</p>
+                    <div class="message-time">10:01</div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" class="message-input" id="messageInput" placeholder="Введите сообщение...">
+                <button class="send-button" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные контактов
+        const contacts = [
+            { id: 1, name: "Анна", status: "В сети", avatar: "А", color: "#e74c3c" },
+            { id: 2, name: "Иван", status: "Был(а) 5 мин назад", avatar: "И", color: "#3498db" },
+            { id: 3, name: "Мария", status: "В сети", avatar: "М", color: "#9b59b6" },
+            { id: 4, name: "Алексей", status: "Не в сети", avatar: "А", color: "#2ecc71" },
+            { id: 5, name: "Ольга", status: "В сети", avatar: "О", color: "#f39c12" },
+            { id: 6, name: "Общий чат", status: "12 участников", avatar: "#", color: "#1abc9c" }
+        ];
+
+        // Данные сообщений (для каждого контакта)
+        const messagesData = {
+            1: [
+                { text: "Привет! Как твои дела?", time: "10:05", incoming: true },
+                { text: "Всё отлично, спасибо! А у тебя?", time: "10:07", incoming: false }
+            ],
+            2: [
+                { text: "Напомни, во сколько встреча?", time: "09:15", incoming: true }
+            ],
+            3: [
+                { text: "Отправила тебе документы", time: "Вчера, 16:30", incoming: true }
+            ],
+            4: [],
+            5: [
+                { text: "Завтра готовы обсудить проект?", time: "Ср, 11:20", incoming: true }
+            ],
+            6: [
+                { text: "Добро пожаловать в онлайн-чат! Начните общение.", time: "10:00", incoming: true },
+                { text: "Привет! Как дела?", time: "10:01", incoming: false }
+            ]
+        };
+
+        let activeContactId = 6; // ID активного контакта (по умолчанию Общий чат)
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            renderContacts();
+            setActiveContact(activeContactId);
+            setupEventListeners();
+        });
+
+        // Рендеринг списка контактов
+        function renderContacts() {
+            const contactsList = document.getElementById('contactsList');
+            contactsList.innerHTML = '';
+
+            contacts.forEach(contact => {
+                const contactElement = document.createElement('div');
+                contactElement.className = `contact ${contact.id === activeContactId ? 'active' : ''}`;
+                contactElement.dataset.id = contact.id;
+                contactElement.innerHTML = `
+                    <div class="contact-avatar" style="background-color: ${contact.color}">${contact.avatar}</div>
+                    <div class="contact-info">
+                        <h4>${contact.name}</h4>
+                        <p>${contact.status}</p>
+                    </div>
+                `;
+                contactsList.appendChild(contactElement);
+
+                // Обработчик клика по контакту
+                contactElement.addEventListener('click', () => {
+                    setActiveContact(contact.id);
+                });
+            });
+        }
+
+        // Установка активного контакта
+        function setActiveContact(contactId) {
+            activeContactId = contactId;
+            renderContacts();
+            
+            const activeContact = contacts.find(c => c.id === contactId);
+            document.getElementById('activeContactName').textContent = activeContact.name;
+            document.getElementById('activeContactStatus').textContent = activeContact.status;
+            
+            renderMessages();
+        }
+
+        // Рендеринг сообщений для активного контакта
+        function renderMessages() {
+            const chatMessages = document.getElementById('chatMessages');
+            const messages = messagesData[activeContactId] || [];
+            
+            chatMessages.innerHTML = '';
+            
+            messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${message.incoming ? 'incoming' : 'outgoing'}`;
+                messageElement.innerHTML = `
+                    <p>${message.text}</p>
+                    <div class="message-time">${message.time}</div>
+                `;
+                chatMessages.appendChild(messageElement);
+            });
+            
+            // Прокрутка вниз
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Добавление обработчиков событий
+        function setupEventListeners() {
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            
+            // Отправка по кнопке
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Отправка по Enter
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Поиск контактов
+            const searchInput = document.querySelector('.contact-search');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const allContacts = document.querySelectorAll('.contact');
+                
+                allContacts.forEach(contact => {
+                    const contactName = contact.querySelector('h4').textContent.toLowerCase();
+                    if (contactName.includes(searchTerm)) {
+                        contact.style.display = 'flex';
+                    } else {
+                        contact.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Функция отправки сообщения
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (text === '') return;
+            
+            // Добавление сообщения в данные
+            if (!messagesData[activeContactId]) {
+                messagesData[activeContactId] = [];
+            }
+            
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            messagesData[activeContactId].push({
+                text: text,
+                time: timeString,
+                incoming: false
+            });
+            
+            // Обновление отображения
+            renderMessages();
+            
+            // Очистка поля ввода
+            input.value = '';
+            input.focus();
+            
+            // Имитация ответа для некоторых контактов (кроме общего чата)
+            if (activeContactId !== 6 && Math.random() > 0.3) {
+                setTimeout(() => {
+                    const replies = [
+                        "Интересно!",
+                        "Спасибо за информацию.",
+                        "Давай обсудим это позже.",
+                        "Я понял(а).",
+                        "Отлично!"
+                    ];
+                    const randomReply = replies[Math.floor(Math.random() * replies.length)];
+                    
+                    messagesData[activeContactId].push({
+                        text: randomReply,
+                        time: `${now.getHours().toString().padStart(2, '0')}:${(now.getMinutes() + 1).toString().padStart(2, '0')}`,
+                        incoming: true
+                    });
+                    
+                    renderMessages();
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
