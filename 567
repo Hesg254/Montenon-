@@ -1,0 +1,710 @@
+> <!DOCTYPE html>
+> <html lang="ru">
+> <head>
+>     <meta charset="UTF-8">
+>     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+>     <title>SkinExchange · Мониторинг цен в Gold</title>
+>     <!-- Google Fonts & Feather Icons (крипто-стиль) -->
+>     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+>     <script src="https://unpkg.com/feather-icons"></script>
+>     <style>
+>         * {
+>             margin: 0;
+>             padding: 0;
+>             box-sizing: border-box;
+>         }
+> 
+>         body {
+>             background: #0b0f1c;
+>             font-family: 'Inter', sans-serif;
+>             color: #e4e7f0;
+>             padding: 24px 20px;
+>             min-height: 100vh;
+>             display: flex;
+>             flex-direction: column;
+>         }
+> 
+>         /* главный контейнер */
+>         .app {
+>             max-width: 1600px;
+>             margin: 0 auto;
+>             width: 100%;
+>         }
+> 
+>         /* хедер в стиле биржи */
+>         .header {
+>             display: flex;
+>             flex-wrap: wrap;
+>             align-items: center;
+>             justify-content: space-between;
+>             gap: 20px;
+>             margin-bottom: 28px;
+>             background: #141a2b;
+>             padding: 18px 24px;
+>             border-radius: 28px;
+>             border: 1px solid #2c3246;
+>             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+>         }
+> 
+>         .logo-area {
+>             display: flex;
+>             align-items: center;
+>             gap: 12px;
+>         }
+> 
+>         .logo-icon {
+>             background: #f0b90b;
+>             width: 40px;
+>             height: 40px;
+>             border-radius: 12px;
+>             display: flex;
+>             align-items: center;
+>             justify-content: center;
+>             color: #0b0f1c;
+>         }
+> 
+>         .logo-icon i {
+>             width: 28px;
+>             height: 28px;
+>             stroke-width: 2;
+>         }
+> 
+>         .exchange-name h1 {
+>             font-size: 1.9rem;
+>             font-weight: 600;
+>             letter-spacing: -0.5px;
+>             background: linear-gradient(135deg, #f9e288, #e6b422);
+>             -webkit-background-clip: text;
+>             -webkit-text-fill-color: transparent;
+>             background-clip: text;
+>         }
+> 
+>         .exchange-name span {
+>             font-size: 0.9rem;
+>             color: #7b8db3;
+>             display: block;
+>             margin-top: 2px;
+>         }
+> 
+>         .gold-indicator {
+>             background: #1f283f;
+>             padding: 10px 24px;
+>             border-radius: 40px;
+>             border: 1px solid #3d4b66;
+>             font-weight: 600;
+>             font-size: 1.3rem;
+>             display: flex;
+>             align-items: center;
+>             gap: 10px;
+>         }
+> 
+>         .gold-indicator i {
+>             color: #f5c84e;
+>             width: 22px;
+>             height: 22px;
+>         }
+> 
+>         .control-panel {
+>             background: #101624;
+>             border-radius: 24px;
+>             padding: 22px 26px;
+>             margin-bottom: 32px;
+>             border: 1px solid #2f3a54;
+>             display: flex;
+>             flex-wrap: wrap;
+>             align-items: flex-end;
+>             gap: 30px;
+>             box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.02);
+>         }
+> 
+>         .upload-zone {
+>             flex: 2;
+>             min-width: 280px;
+>         }
+> 
+>         .upload-zone label {
+>             display: block;
+>             font-size: 0.85rem;
+>             text-transform: uppercase;
+>             letter-spacing: 1px;
+>             color: #8899c9;
+>             margin-bottom: 8px;
+>         }
+> 
+>         .file-input-wrapper {
+>             background: #1c2338;
+>             border-radius: 60px;
+>             padding: 4px;
+>             border: 1px solid #33415c;
+>             display: flex;
+>             align-items: center;
+>         }
+> 
+>         .file-input-wrapper input[type="file"] {
+>             background: transparent;
+>             border: none;
+>             color: #b7c3e0;
+>             padding: 12px 18px;
+>             width: 100%;
+>             font-size: 0.95rem;
+>         }
+> 
+>         .file-input-wrapper input[type="file"]::file-selector-button {
+>             background: #2d3b5a;
+>             border: none;
+>             color: white;
+>             padding: 8px 22px;
+>             border-radius: 40px;
+>             margin-right: 20px;
+>             font-weight: 500;
+>             cursor: pointer;
+>             transition: 0.2s;
+>             border: 1px solid #4e6188;
+>         }
+> 
+>         .file-input-wrapper input[type="file"]::file-selector-button:hover {
+>             background: #3e517a;
+>         }
+> 
+>         .params {
+>             flex: 1;
+>             min-width: 220px;
+>             display: flex;
+>             flex-direction: column;
+>             gap: 14px;
+>         }
+> 
+>         .param-row {
+>             display: flex;
+>             align-items: center;
+>             gap: 10px;
+>             background: #1c2338;
+>             padding: 6px 16px 6px 20px;
+>             border-radius: 40px;
+>             border: 1px solid #313d5c;
+>         }
+> 
+>         .param-row label {
+>             font-weight: 500;
+>             color: #b1c0e0;
+>             min-width: 60px;
+>         }
+> 
+>         .param-row input {
+>             background: transparent;
+>             border: none;
+>             padding: 12px 5px;
+>             color: #f2e9c2;
+>             font-size: 1.1rem;
+>             font-weight: 600;
+>             width: 100px;
+>             outline: none;
+>         }
+> 
+>         .param-row input[type="number"] {
+>             -moz-appearance: textfield;
+>         }
+> 
+>         .param-row span {
+>             color: #f5c84e;
+>             font-weight: 700;
+>             font-size: 1.2rem;
+>         }
+> 
+>         .action-buttons {
+>             display: flex;
+>             gap: 14px;
+>             align-items: center;
+>         }
+> 
+>         .btn {
+>             background: #242e48;
+>             border: 1px solid #405479;
+>             color: #e8ecf5;
+>             padding: 14px 26px;
+>             border-radius: 40px;
+>             font-weight: 600;
+>             font-size: 1rem;
+>             cursor: pointer;
+>             transition: all 0.15s;
+>             display: inline-flex;
+>             align-items: center;
+>             gap: 10px;
+>         }
+> 
+>         .btn i {
+>             width: 20px;
+>             height: 20px;
+>         }
+> 
+>         .btn-primary {
+>             background: linear-gradient(145deg, #f0b90b, #d49c14);
+>             border-color: #fad14b;
+>             color: #0b0f1c;
+>             box-shadow: 0 4px 12px #e6b42240;
+>         }
+> 
+>         .btn-primary:hover {
+>             background: #ffcd4d;
+>             border-color: #ffe694;
+>         }
+> 
+>         .btn-warning {
+>             background: #2e2230;
+>             border-color: #a13e3e;
+>             color: #ffaeae;
+>         }
+> 
+>         .btn-warning:hover {
+>             background: #452f35;
+>         }
+> 
+>         .market-stats {
+>             display: flex;
+>             gap: 14px;
+>             margin-left: auto;
+>             color: #90a2d9;
+>             font-size: 0.95rem;
+>         }
+> 
+>         /* таблица/сетка скинов */
+>         .skin-grid {
+>             display: grid;
+>             grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+>             gap: 18px;
+>             margin-bottom: 30px;
+>         }
+> 
+>         .skin-card {
+>             background: #131b2c;
+>             border-radius: 24px;
+>             border: 1px solid #28324b;
+>             overflow: hidden;
+>             transition: transform 0.1s ease, border-color 0.2s;
+>             box-shadow: 0 6px 14px #0000004d;
+>             backdrop-filter: blur(2px);
+>             display: flex;
+>             flex-direction: column;
+>         }
+> 
+>         .skin-card:hover {
+>             border-color: #f5b81b;
+>             transform: translateY(-3px);
+>         }
+> 
+>         .image-area {
+>             background: #101624;
+>             height: 150px;
+>             display: flex;
+>             align-items: center;
+>             justify-content: center;
+>             border-bottom: 1px dashed #31415e;
+>             padding: 12px;
+>             position: relative;
+>         }
+> 
+>         .image-area img {
+>             max-width: 100%;
+>             max-height: 130px;
+>             object-fit: contain;
+>             border-radius: 12px;
+>         }
+> 
+>         .no-image {
+>             color: #54647f;
+>             font-size: 0.85rem;
+>             display: flex;
+>             flex-direction: column;
+>             align-items: center;
+>             gap: 6px;
+>         }
+> 
+>         .no-image i {
+>             width: 32px;
+>             height: 32px;
+>             color: #3e506f;
+>         }
+> 
+>         .skin-info {
+>             padding: 14px 16px 16px;
+>             background: #0e1422;
+>         }
+> 
+>         .skin-name {
+>             font-weight: 600;
+>             font-size: 1.2rem;
+>             white-space: nowrap;
+>             overflow: hidden;
+>             text-overflow: ellipsis;
+>             color: #d6def5;
+>             margin-bottom: 8px;
+>         }
+> 
+>         .price-area {
+>             display: flex;
+>             align-items: baseline;
+>             justify-content: space-between;
+>             margin-bottom: 16px;
+>         }
+> 
+>         .price-gold {
+>             background: #20293f;
+>             padding: 6px 14px;
+>             border-radius: 40px;
+>             font-weight: 700;
+>             font-size: 1.4rem;
+>             color: #fad14b;
+>             letter-spacing: 0.5px;
+>             border: 1px solid #5f6f96;
+>         }
+> 
+>         .price-gold small {
+>             font-size: 0.8rem;
+>             font-weight: 400;
+>             color: #8f9fc7;
+>             margin-left: 4px;
+>         }
+> 
+>         .candle-trend {
+>             display: flex;
+>             align-items: center;
+>             gap: 5px;
+>             background: #1e263b;
+>             padding: 5px 12px;
+>             border-radius: 30px;
+>         }
+> 
+>         .candle-trend i {
+>             width: 18px;
+>             height: 18px;
+>             color: #67b77b;
+>         }
+> 
+>         .down i {
+>             color: #d36a6a;
+>         }
+> 
+>         .edit-controls {
+>             display: flex;
+>             gap: 8px;
+>             margin-top: 6px;
+>         }
+> 
+>         .edit-controls input {
+>             background: #1f2843;
+>             border: 1px solid #3f5079;
+>             border-radius: 30px;
+>             padding: 8px 8px 8px 16px;
+>             width: 100%;
+>             color: #f0e5b9;
+>             font-weight: 600;
+>             outline: none;
+>         }
+> 
+>         .edit-controls input:focus {
+>             border-color: #f3ba2f;
+>         }
+> 
+>         .small-btn {
+>             background: #27334f;
+>             border: none;
+>             color: #ccd9f0;
+>             border-radius: 30px;
+>             padding: 8px 15px;
+>             font-weight: 600;
+>             cursor: pointer;
+>             transition: 0.1s;
+>             font-size: 0.9rem;
+>             display: inline-flex;
+>             align-items: center;
+>             gap: 5px;
+>         }
+> 
+>         .small-btn i {
+>             width: 16px;
+>             height: 16px;
+>         }
+> 
+>         .small-btn:hover {
+>             background: #36486e;
+>         }
+> 
+>         .count-badge {
+>             background: #1f2940;
+>             padding: 8px 18px;
+>             border-radius: 50px;
+>             font-size: 1rem;
+>             border: 1px solid #37476b;
+>         }
+> 
+>         .footer-note {
+>             text-align: right;
+>             color: #4f6190;
+>             font-size: 0.85rem;
+>             border-top: 1px solid #1f2a40;
+>             padding-top: 24px;
+>             margin-top: 10px;
+>         }
+>     </style>
+> </head>
+> <body>
+> <div class="app">
+>     <!-- Шапка биржи -->
+>     <div class="header">
+>         <div class="logo-area">
+>             <div class="logo-icon">
+>                 <i data-feather="bar-chart-2"></i>
+>             </div>
+>             <div class="exchange-name">
+>                 <h1>SKIN<span style="background:none; -webkit-text-fill-color:#e6b422;">GOLD</span></h1>
+>                 <span>peer‑to‑floor · only monitor</span>
+>             </div>
+>         </div>
+>         <div class="gold-indicator">
+>             <i data-feather="dollar-sign"></i>
+>             <span>1 GOLD = 1.00 USD</span>
+>         </div>
+>     </div>
+> 
+>     <!-- Панель управления (загрузка, массовое редактирование) -->
+>     <div class="control-panel">
+>         <div class="upload-zone">
+>             <label>📁 ЗАГРУЗИТЬ ИЗОБРАЖЕНИЯ (PNG/JPG, макс. 1000)</label>
+>             <div class="file-input-wrapper">
+>                 <input type="file" id="fileInput" multiple accept="image/png, image/jpeg, image/jpg">
+>             </div>
+>         </div>
+>         <div class="params">
+>             <div class="param-row">
+>                 <label>ИМЯ</label>
+>                 <input type="text" id="bulkName" placeholder="Skin name" value="Case hardened">
+>             </div>
+>             <div class="param-row">
+>                 <label>ЦЕНА</label>
+>                 <input type="number" id="bulkPrice" value="1500" step="1" min="0">
+>                 <span>GOLD</span>
+>             </div>
+>         </div>
+>         <div class="action-buttons">
+>             <button class="btn btn-primary" id="addSkinsBtn"><i data-feather="upload"></i> Добавить скины</button>
+>             <button class="btn" id="applyPriceToAllBtn"><i data-feather="trending-up"></i> Применить цену ко всем
+>             </button>
+>             <button class="btn-warning btn" id="clearAllBtn"><i data-feather="trash-2"></i> Сброс</button>
+>         </div>
+>         <div class="market-stats">
+>             <span id="skinCounter">0 / 1000</span>
+>             <i data-feather="cpu"></i>
+>         </div>
+>     </div>
+> 
+>     <!-- Сетка скинов (карточки) -->
+>     <div id="skinContainer" class="skin-grid"></div>
+>     <div class="footer-note">
+>         <i data-feather="activity" style="width:16px;margin-right:4px;"></i> ручное управление ценами · свечной график не строится, но стиль биржи сохранён
+>     </div>
+> </div>
+> 
+> <script>
+>     (function() {
+>         feather.replace({ width: 20, height: 20 });
+> 
+>         // ----- Элементы DOM -----
+>         const fileInput = document.getElementById('fileInput');
+>         const bulkNameInput = document.getElementById('bulkName');
+>         const bulkPriceInput = document.getElementById('bulkPrice');
+>         const addBtn = document.getElementById('addSkinsBtn');
+>         const applyPriceAllBtn = document.getElementById('applyPriceToAllBtn');
+>         const clearAllBtn = document.getElementById('clearAllBtn');
+>         const skinContainer = document.getElementById('skinContainer');
+>         const skinCounterSpan = document.getElementById('skinCounter');
+> 
+>         // ----- Глобальное хранилище скинов -----
+>         let skins = [];          // массив объектов { id, name, price, imgData }
+>         const MAX_SKINS = 1000;
+> 
+>         // ----- Обновление счётчика на панели -----
+>         function updateCounter() {
+>             skinCounterSpan.innerText = skins.length + ' / ' + MAX_SKINS;
+>         }
+> 
+>         // ----- Рендер всех карточек -----
+>         function renderSkins() {
+>             if (skins.length === 0) {
+>                 skinContainer.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:60px 20px; background:#0d1322; border-radius:40px; border:1px dashed #33415c;">
+>                     <i data-feather="image" style="width:48px;height:48px;color:#3d506e;"></i>
+>                     <p style="color:#7d8fc0; margin-top:16px;">Нет загруженных скинов. Добавьте изображения и укажите цену.</p>
+>                 </div>`;
+>                 feather.replace();
+>                 return;
+>             }
+> 
+>             let html = '';
+>             for (let i = 0; i < skins.length; i++) {
+>                 const s = skins[i];
+>                 // случайный "тренд" для декора (имитация свечного графика)
+>                 const trendUp = (i * 7) % 3 !== 0; // просто для разнообразия
+>                 html += `
+>                 <div class="skin-card" data-id="${s.id}">
+>                     <div class="image-area">
+>                         ${s.imgData ? `<img src="${s.imgData}" alt="skin">` : 
+>                             `<div class="no-image"><i data-feather="image"></i> <span>нет фото</span></div>`}
+>                     </div>
+>                     <div class="skin-info">
+>                         <div class="skin-name" title="${s.name}">${s.name || 'Unnamed'}</div>
+>                         <div class="price-area">
+>                             <span class="price-gold">${Number(s.price).toLocaleString()}<small> GOLD</small></span>
+>                             <span class="candle-trend ${trendUp ? '' : 'down'}">
+>                                 <i data-feather="${trendUp ? 'trending-up' : 'trending-down'}"></i>
+>                             </span>
+>                         </div>
+>                         <!-- inline редактирование названия/цены прямо в карточке -->
+>                         <div class="edit-controls">
+>                             <input type="text" class="edit-name-input" placeholder="имя" value="${s.name.replace(/"/g, '&quot;')}">
+>                             <input type="number" class="edit-price-input" value="${s.price}" step="1" min="0">
+>                             <button class="small-btn save-skin-btn" data-id="${s.id}"><i data-feather="check"></i></button>
+>                             <button class="small-btn remove-skin-btn" data-id="${s.id}" style="background:#321f2b;"><i data-feather="x"></i></button>
+>                         </div>
+>                     </div>
+>                 </div>
+>                 `;
+>             }
+>             skinContainer.innerHTML = html;
+>             feather.replace(); // перерисовываем иконки
+> 
+>             // --- Добавляем обработчики на кнопки Сохранить и Удалить в каждой карточке ---
+>             document.querySelectorAll('.save-skin-btn').forEach(btn => {
+>                 btn.addEventListener('click', (e) => {
+>                     const card = e.currentTarget.closest('.skin-card');
+>                     const id = e.currentTarget.getAttribute('data-id');
+>                     const nameInput = card.querySelector('.edit-name-input');
+>                     const priceInput = card.querySelector('.edit-price-input');
+>                     const newName = nameInput.value.trim() || 'skin';
+>                     const newPrice = Math.max(0, parseInt(priceInput.value) || 0);
+>                     updateSkin(id, newName, newPrice);
+>                 });
+>             });
+> 
+>             document.querySelectorAll('.remove-skin-btn').forEach(btn => {
+>                 btn.addEventListener('click', (e) => {
+>                     const id = e.currentTarget.getAttribute('data-id');
+>                     removeSkinById(id);
+>                 });
+>             });
+>         }
+> 
+>         // ----- Обновить конкретный скин (название/цена) -----
+>         function updateSkin(id, newName, newPrice) {
+>             const skin = skins.find(s => s.id == id);
+>             if (skin) {
+>                 skin.name = newName;
+>                 skin.price = newPrice;
+>                 renderSkins();
+>                 updateCounter();
+>             }
+>         }
+> 
+>         // ----- Удалить скин по id -----
+>         function removeSkinById(id) {
+>             skins = skins.filter(s => s.id != id);
+>             renderSkins();
+>             updateCounter();
+>         }
+> 
+>         // ----- Добавление новых скинов из файлов + массовое имя/цена -----
+>         function addSkinsFromFiles(files, defaultName, defaultPrice) {
+>             if (!files || files.length === 0) return;
+> 
+>             const price = Math.max(0, parseInt(defaultPrice) || 0);
+>             const baseName = defaultName.trim() || 'Skin';
+> 
+>             // Проверка лимита
+>             let available = MAX_SKINS - skins.length;
+>             if (available <= 0) {
+>                 alert(`Достигнут лимит (${MAX_SKINS}). Удалите часть скинов.`);
+>                 return;
+>             }
+> 
+>             const filesToProcess = Array.from(files).slice(0, available); // не больше лимита
+> 
+>             let processed = 0;
+>             filesToProcess.forEach((file, index) => {
+>                 if (!file.type.startsWith('image/')) return;
+> 
+>                 const reader = new FileReader();
+>                 reader.onload = (e) => {
+>                     const newSkin = {
+>                         id: Date.now() + Math.random() * 10000 + index, // уникальный id
+>                         name: baseName + (filesToProcess.length > 1 ? ' #' + (index+1) : ''),
+>                         price: price,
+>                         imgData: e.target.result
+>                     };
+>                     skins.push(newSkin);
+> 
+>                     processed++;
+>                     if (processed === filesToProcess.length) {
+>                         renderSkins();
+>                         updateCounter();
+>                     }
+>                 };
+>                 reader.readAsDataURL(file);
+>             });
+> 
+>             // если файлы не картинки или нулевой массив — всё равно перерендер
+>             if (filesToProcess.length === 0) {
+>                 renderSkins();
+>                 updateCounter();
+>             } else {
+>                 // на случай если все reader сработают асинхронно
+>                 setTimeout(() => {
+>                     if (processed < filesToProcess.length) {
+>                         renderSkins(); // fallback
+>                         updateCounter();
+>                     }
+>                 }, 1500);
+>             }
+>         }
+> 
+>         // ----- обработчик кнопки "Добавить скины" -----
+>         addBtn.addEventListener('click', () => {
+>             const files = fileInput.files;
+>             const defaultName = bulkNameInput.value;
+>             const defaultPrice = bulkPriceInput.value;
+>             addSkinsFromFiles(files, defaultName, defaultPrice);
+>             // не сбрасываем fileInput, чтобы можно было добавить те же (если нужно)
+>         });
+> 
+>         // ----- Применить текущую цену (из поля bulkPrice) ко всем существующим скинам -----
+>         applyPriceAllBtn.addEventListener('click', () => {
+>             const newPrice = Math.max(0, parseInt(bulkPriceInput.value) || 0);
+>             if (skins.length === 0) return;
+>             skins.forEach(s => s.price = newPrice);
+>             renderSkins();
+>         });
+> 
+>         // ----- Очистить всё (сбросить все скины) -----
+>         clearAllBtn.addEventListener('click', () => {
+>             if (skins.length > 0 && confirm('Удалить все загруженные скины?')) {
+>                 skins = [];
+>                 fileInput.value = ''; // сбросить файлы
+>                 renderSkins();
+>                 updateCounter();
+>             }
+>         });
+> 
+>         // ----- дополнительно: клавиша "Enter" в инпутах не мешает -----
+>         window.addEventListener('keydown', (e) => {
+>             if (e.key === 'Enter' && (e.target.tagName === 'INPUT')) e.preventDefault();
+>         });
+> 
+>         // инициализация пустой сетки
+>         renderSkins();
+>         updateCounter();
+>     })();
+> </script>
+> <!-- дополнительно пропишем иконки вручную для статики -->
+> <script>
+>     (function secondaryFeather() { setTimeout(() => feather.replace(), 200); })();
+> </script>
+> </body>
+> </html>
+
